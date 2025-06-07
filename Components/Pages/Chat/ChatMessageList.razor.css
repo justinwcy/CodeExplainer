@@ -13,7 +13,6 @@
     text-align: center;
     font-size: 1.25rem;
     color: #999;
-    margin-top: calc(40vh - 18rem);
 }
 
 chat-messages > ::deep div:last-of-type {

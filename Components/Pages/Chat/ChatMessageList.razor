@@ -1,6 +1,6 @@
 @inject IJSRuntime JS
 
-<div class="message-list-container">
+<div class="message-list-container" Style="height: 40vh; overflow: scroll;">
     <chat-messages class="page-width message-list" in-progress="@(InProgressMessage is not null)">
         @foreach (var message in Messages)
         {

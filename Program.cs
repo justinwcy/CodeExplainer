@@ -1,9 +1,14 @@
-using Microsoft.Extensions.AI;
+using System.ClientModel;
+
 using CodeExplainer.Components;
 using CodeExplainer.Services;
 using CodeExplainer.Services.Ingestion;
+
+using Microsoft.Extensions.AI;
+
+using MudBlazor.Services;
+
 using OpenAI;
-using System.ClientModel;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRazorComponents().AddInteractiveServerComponents();
@@ -31,6 +36,9 @@ builder.Services.AddScoped<DataIngestor>();
 builder.Services.AddSingleton<SemanticSearch>();
 builder.Services.AddChatClient(chatClient).UseFunctionInvocation().UseLogging();
 builder.Services.AddEmbeddingGenerator(embeddingGenerator);
+
+// Add MudBlazor services
+builder.Services.AddMudServices();
 
 var app = builder.Build();
 

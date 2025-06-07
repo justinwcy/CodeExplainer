@@ -9,12 +9,14 @@
     <link rel="stylesheet" href="@Assets["CodeExplainer.styles.css"]" />
     <ImportMap />
     <HeadOutlet @rendermode="@renderMode" />
+    <link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" />
 </head>
 
 <body>
     <Routes @rendermode="@renderMode" />
     <script src="@Assets["app.js"]" type="module"></script>
-    <script src="@Assets["_framework/blazor.web.js"]"></script>
+    <script src="_framework/blazor.web.js"></script>
+    <script src="_content/MudBlazor/MudBlazor.min.js"></script>
 </body>
 
 </html>

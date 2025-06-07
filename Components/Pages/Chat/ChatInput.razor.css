@@ -1,11 +1,11 @@
 ﻿.input-box {
-    display: flex; 
-    flex-direction: column; 
-    background: white;
+    display: flex;
+    flex-direction: column;
+    background: #CC99FF;
     border: 1px solid rgb(229, 231, 235);
     border-radius: 8px;
     padding: 0.5rem 0.75rem;
-    margin-top: 0.75rem; 
+    margin-top: 0.75rem;
 }
 
     .input-box:focus-within {
@@ -17,6 +17,7 @@ textarea {
     border: none;
     outline: none;
     flex-grow: 1;
+    color: black;
 }
 
     textarea:placeholder-shown + .tools {
@@ -24,8 +25,8 @@ textarea {
     }
 
 .tools {
-    display: flex; 
-    margin-top: 1rem; 
+    display: flex;
+    margin-top: 1rem;
     align-items: center;
 }
 
@@ -35,7 +36,7 @@ textarea {
 }
 
 .send-button {
-    color: var(--send-button-color);
+    color: black;
     margin-left: auto;
 }
 

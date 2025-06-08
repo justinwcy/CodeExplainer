@@ -14,9 +14,6 @@ public class IngestedChunk
     public required string DocumentId { get; set; }
 
     [VectorStoreData]
-    public int PageNumber { get; set; }
-
-    [VectorStoreData]
     public required string Text { get; set; }
 
     [VectorStoreVector(VectorDimensions, DistanceFunction = VectorDistanceFunction)]

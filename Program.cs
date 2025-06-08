@@ -64,5 +64,8 @@ app.MapRazorComponents<App>()
 await DataIngestor.IngestDataAsync(
     app.Services,
     new PDFDirectorySource(Path.Combine(builder.Environment.WebRootPath, "Data")));
+await DataIngestor.IngestDataAsync(
+    app.Services,
+    new CodeFileDirectorySource(Path.Combine(builder.Environment.WebRootPath, "Data")));
 
 app.Run();

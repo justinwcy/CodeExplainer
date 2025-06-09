@@ -1,4 +1,7 @@
-﻿using Microsoft.SemanticKernel.Text;
+﻿using System.Security.Cryptography;
+using System.Text;
+using Microsoft.SemanticKernel.Text;
+
 using UglyToad.PdfPig;
 using UglyToad.PdfPig.Content;
 using UglyToad.PdfPig.DocumentLayoutAnalysis.PageSegmenter;
@@ -9,9 +12,15 @@ namespace CodeExplainer.Services.Ingestion;
 public class PDFDirectorySource(string sourceDirectory) : IIngestionSource
 {
     public string SourceFileId(string path) => Path.GetRelativePath(sourceDirectory, path);
-    public static string SourceFileVersion(string path) => File.GetLastWriteTimeUtc(path).ToString("o");
 
     public string SourceId => $"{nameof(PDFDirectorySource)}:{sourceDirectory}";
+
+    public string SourceFileHashsum(string filePath)
+    {
+        using var md5 = MD5.Create();
+        using var stream = File.OpenRead(filePath);
+        return Encoding.Default.GetString(md5.ComputeHash(stream));
+    }
 
     public Task<IEnumerable<IngestedDocument>> GetNewOrModifiedDocumentsAsync(IReadOnlyList<IngestedDocument> existingDocuments)
     {
@@ -22,7 +31,7 @@ public class PDFDirectorySource(string sourceDirectory) : IIngestionSource
         foreach (var sourceFile in sourceFiles)
         {
             var sourceFileId = SourceFileId(sourceFile);
-            var sourceFileVersion = SourceFileVersion(sourceFile);
+            var sourceFileVersion = SourceFileHashsum(sourceFile);
             var existingDocumentVersion = existingDocumentsById.TryGetValue(sourceFileId, out var existingDocument) ? existingDocument.DocumentVersion : null;
             if (existingDocumentVersion != sourceFileVersion)
             {

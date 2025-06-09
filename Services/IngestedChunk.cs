@@ -4,7 +4,9 @@ namespace CodeExplainer.Services;
 
 public class IngestedChunk
 {
-    private const int VectorDimensions = 1536; // 1536 is the default vector size for the OpenAI text-embedding-3-small model
+    // 1536 is the default vector size for the OpenAI text-embedding-3-small model
+    // 768 is the default vector size for the nomic-embed-text:latest
+    private const int VectorDimensions = 768; 
     private const string VectorDistanceFunction = DistanceFunction.CosineDistance;
 
     [VectorStoreKey]

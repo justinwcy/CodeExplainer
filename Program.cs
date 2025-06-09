@@ -1,4 +1,5 @@
 using System.ClientModel;
+using System.Net.Http;
 
 using CodeExplainer.Components;
 using CodeExplainer.Services;
@@ -7,7 +8,7 @@ using CodeExplainer.Services.Ingestion;
 using Microsoft.Extensions.AI;
 
 using MudBlazor.Services;
-
+using OllamaSharp;
 using OpenAI;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -25,7 +26,18 @@ var openAIOptions = new OpenAIClientOptions()
 
 var ghModelsClient = new OpenAIClient(credential, openAIOptions);
 var chatClient = ghModelsClient.GetChatClient("gpt-4o-mini").AsIChatClient();
-var embeddingGenerator = ghModelsClient.GetEmbeddingClient("text-embedding-3-small").AsIEmbeddingGenerator();
+
+var hostUrl = "http://localhost:11434";
+var httpClient = new HttpClient
+{
+    BaseAddress = new Uri(hostUrl),
+    Timeout = TimeSpan.FromDays(1)
+    // Default is 100 seconds (1 minute 40 seconds)
+};
+IEmbeddingGenerator<string, Embedding<float>> embeddingGenerator
+    = new OllamaApiClient(httpClient, "nomic-embed-text:latest");
+
+//var embeddingGenerator = ghModelsClient.GetEmbeddingClient("text-embedding-3-small").AsIEmbeddingGenerator();
 
 var vectorStorePath = Path.Combine(AppContext.BaseDirectory, "vector-store.db");
 var vectorStoreConnectionString = $"Data Source={vectorStorePath}";

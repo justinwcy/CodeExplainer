@@ -1,17 +1,20 @@
-﻿using Microsoft.SemanticKernel.Text;
-using UglyToad.PdfPig;
-using UglyToad.PdfPig.Content;
-using UglyToad.PdfPig.DocumentLayoutAnalysis.PageSegmenter;
-using UglyToad.PdfPig.DocumentLayoutAnalysis.WordExtractor;
+﻿using System.Security.Cryptography;
+using System.Text;
 
 namespace CodeExplainer.Services.Ingestion;
 
 public class CodeFileDirectorySource(string sourceDirectory) : IIngestionSource
 {
     public string SourceFileId(string path) => Path.GetRelativePath(sourceDirectory, path);
-    public static string SourceFileVersion(string path) => File.GetLastWriteTimeUtc(path).ToString("o");
 
     public string SourceId => $"{nameof(CodeFileDirectorySource)}:{sourceDirectory}";
+
+    public string SourceFileHashsum(string filePath)
+    {
+        using var md5 = MD5.Create();
+        using var stream = File.OpenRead(filePath);
+        return Encoding.Default.GetString(md5.ComputeHash(stream));
+    }
 
     public Task<IEnumerable<IngestedDocument>> GetNewOrModifiedDocumentsAsync(IReadOnlyList<IngestedDocument> existingDocuments)
     {
@@ -22,7 +25,7 @@ public class CodeFileDirectorySource(string sourceDirectory) : IIngestionSource
         foreach (var sourceFile in sourceFiles)
         {
             var sourceFileId = SourceFileId(sourceFile);
-            var sourceFileVersion = SourceFileVersion(sourceFile);
+            var sourceFileVersion = SourceFileHashsum(sourceFile);
             var existingDocumentVersion = existingDocumentsById.TryGetValue(sourceFileId, out var existingDocument) ? existingDocument.DocumentVersion : null;
             if (existingDocumentVersion != sourceFileVersion)
             {
@@ -44,25 +47,35 @@ public class CodeFileDirectorySource(string sourceDirectory) : IIngestionSource
     public Task<IEnumerable<IngestedChunk>> CreateChunksForDocumentAsync(IngestedDocument document)
     {
         var filePath = Path.Combine(sourceDirectory, document.DocumentId);
-        var lines = File.ReadAllLines(filePath);
-        var chunks = new List<IngestedChunk>();
-        int chunkSize = 200;
-        int chunkIndex = 0;
-
-        for (int i = 0; i < lines.Length; i += chunkSize)
+        var codeString = File.ReadAllText(filePath);
+        var recursiveCodeSplitter = new RecursiveCodeSplitter(200, 20);
+        var splitCodeStrings = recursiveCodeSplitter.SplitText(codeString);
+        var chunks = splitCodeStrings.Select(splitCodeString => new IngestedChunk()
         {
-            var chunkLines = lines.Skip(i).Take(chunkSize);
-            var chunkText = string.Join(Environment.NewLine, chunkLines);
+            Key = Guid.CreateVersion7().ToString(),
+            DocumentId = document.DocumentId,
+            Text = splitCodeString
+        });
 
-            chunks.Add(new IngestedChunk
-            {
-                Key = Guid.CreateVersion7().ToString(),
-                DocumentId = document.DocumentId,
-                Text = chunkText
-            });
+        //var lines = File.ReadAllLines(filePath);
+        //var chunks = new List<IngestedChunk>();
+        //int chunkSize = 200;
+        //int chunkIndex = 0;
 
-            chunkIndex++;
-        }
+        //for (int i = 0; i < lines.Length; i += chunkSize)
+        //{
+        //    var chunkLines = lines.Skip(i).Take(chunkSize);
+        //    var chunkText = string.Join(Environment.NewLine, chunkLines);
+
+        //    chunks.Add(new IngestedChunk
+        //    {
+        //        Key = Guid.CreateVersion7().ToString(),
+        //        DocumentId = document.DocumentId,
+        //        Text = chunkText
+        //    });
+
+        //    chunkIndex++;
+        //}
 
         return Task.FromResult((IEnumerable<IngestedChunk>)chunks);
     }
